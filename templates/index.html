@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JointPulse | Joint Health Monitoring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">JP</div>
+          <div>
+            <div class="brand-title">JointPulse</div>
+            <div class="brand-subtitle">Joint Health System</div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+          <button class="nav-item active" data-view="dashboard-view"><span class="nav-icon">◫</span><span>Dashboard</span></button>
+          <button class="nav-item" data-view="joint-health-view"><span class="nav-icon">◌</span><span>Joint Health</span></button>
+          <button class="nav-item" data-view="live-monitoring-view"><span class="nav-icon">◎</span><span>Live Monitoring</span></button>
+          <button class="nav-item" data-view="analytics-view"><span class="nav-icon">▣</span><span>Analytics</span></button>
+          <button class="nav-item" data-view="alerts-view"><span class="nav-icon">⚑</span><span>Alerts</span></button>
+          <button class="nav-item" data-view="maintenance-view"><span class="nav-icon">✦</span><span>Maintenance</span></button>
+          <button class="nav-item" data-view="reports-view"><span class="nav-icon">▤</span><span>Reports</span></button>
+        </nav>
+
+        <div class="sidebar-status">
+          <div class="mini-label">System Integrity</div>
+          <div class="mini-value healthy">96.4% stable</div>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <div class="tab-view active" id="dashboard-view">
+          <header class="topbar" id="overview">
+            <div>
+              <div class="eyebrow-row">
+                <span class="eyebrow">Industrial inspection control room</span>
+                <span class="sample-badge">Sample Data</span>
+              </div>
+              <h1>Conveyor Belt Joint Health Monitoring</h1>
+            </div>
+
+            <div class="topbar-meta">
+              <div class="status-pill online"><span class="led"></span>System Online</div>
+              <div class="status-pill"><span class="led live"></span>Live Monitoring</div>
+              <div class="status-pill"><span class="led plc"></span>PLC/SCADA Connected</div>
+              <div class="status-pill small" id="currentDateTime">--</div>
+              <div class="alert-pill"><span id="alertCount">0</span> Alerts</div>
+            </div>
+          </header>
+
+          <section class="kpi-grid">
+            <article class="kpi-card">
+              <div class="kpi-label">Total Registered Joints</div>
+              <div class="kpi-value" id="totalJoints">0</div>
+            </article>
+            <article class="kpi-card success">
+              <div class="kpi-label">Normal Joints</div>
+              <div class="kpi-value" id="normalJoints">0</div>
+            </article>
+            <article class="kpi-card warning">
+              <div class="kpi-label">Warning Joints</div>
+              <div class="kpi-value" id="warningJoints">0</div>
+            </article>
+            <article class="kpi-card critical">
+              <div class="kpi-label">Critical Joints</div>
+              <div class="kpi-value" id="criticalJoints">0</div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-label">Belt Speed</div>
+              <div class="kpi-value"><span id="beltSpeed">0</span> m/s</div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-label">Conveyor Load / Tension</div>
+              <div class="kpi-value"><span id="conveyorLoad">0</span> kN</div>
+            </article>
+            <article class="kpi-card accent">
+              <div class="kpi-label">Overall Belt Health Index</div>
+              <div class="kpi-value" id="overallHealth">0</div>
+            </article>
+          </section>
+
+          <section class="content-grid">
+            <div class="live-panel card emphasis" id="live-monitoring">
+              <div class="panel-header">
+                <div>
+                  <p class="panel-kicker">LIVE JOINT MONITORING</p>
+                  <h2>Current Joint in Station</h2>
+                </div>
+                <div class="header-tag" id="liveStateTag">NORMAL</div>
+              </div>
+
+              <div class="flow-strip">
+                <span>JOINT DETECTED</span>
+                <span class="arrow">→</span>
+                <span>SENSOR DATA CAPTURED</span>
+                <span class="arrow">→</span>
+                <span>DATA FUSED</span>
+                <span class="arrow">→</span>
+                <span>HEALTH ASSESSED</span>
+              </div>
+
+              <div class="live-body">
+                <div class="camera-panel">
+                  <div class="camera-overlay">LIVE CAMERA FEED</div>
+                  <img id="liveJointImage" src="" alt="Live joint image" />
+                </div>
+
+                <div class="joint-metrics">
+                  <div class="metric-row"><label>Joint ID</label><strong id="liveJointId">--</strong></div>
+                  <div class="metric-row"><label>Temperature</label><strong id="liveTemperature">--</strong></div>
+                  <div class="metric-row"><label>Vibration / Impact</label><strong id="liveVibration">--</strong></div>
+                  <div class="metric-row"><label>Load / Tension</label><strong id="liveTension">--</strong></div>
+                  <div class="metric-row"><label>Belt Speed</label><strong id="liveSpeed">--</strong></div>
+                  <div class="metric-row"><label>Motor Current</label><strong id="liveCurrent">--</strong></div>
+                  <div class="metric-row"><label>Belt Alignment</label><strong id="liveAlignment">--</strong></div>
+                  <div class="metric-row"><label>Passage Time</label><strong id="liveTimestamp">--</strong></div>
+                  <div class="metric-row big"><label>Joint Health Index</label><strong id="liveHealthIndex">--</strong></div>
+                  <div class="metric-row status-row"><label>Health Classification</label><strong class="status-badge" id="liveHealthBadge">NORMAL</strong></div>
+                </div>
+              </div>
+
+              <div class="belt-map-panel">
+                <div class="panel-header compact belt-header">
+                  <div>
+                    <p class="panel-kicker">BELT STATUS</p>
+                    <h2>Belt Joint Map</h2>
+                  </div>
+                </div>
+
+                <div class="belt-legend">
+                  <span><i class="legend-dot normal"></i>Normal</span>
+                  <span><i class="legend-dot warning"></i>Warning</span>
+                  <span><i class="legend-dot critical"></i>Critical</span>
+                  <span><i class="legend-dot inactive"></i>Not monitored</span>
+                </div>
+
+                <div class="belt-map" id="beltMap" aria-label="Conveyor belt joint map"></div>
+              </div>
+            </div>
+
+            <div class="overview-panel card" id="joint-health">
+              <div class="panel-header compact">
+                <div>
+                  <p class="panel-kicker">JOINT HEALTH OVERVIEW</p>
+                  <h2>Registered Joints</h2>
+                </div>
+              </div>
+              <div class="joint-grid" id="jointCards"></div>
+            </div>
+          </section>
+
+          <section class="bottom-grid">
+            <div class="history-panel card" id="analytics">
+              <div class="panel-header compact">
+                <div>
+                  <p class="panel-kicker">SELECTED JOINT HISTORY</p>
+                  <h2>Trend Analysis</h2>
+                </div>
+              </div>
+              <div class="chart-grid">
+                <div class="chart-box"><canvas id="healthChart"></canvas></div>
+                <div class="chart-box"><canvas id="temperatureChart"></canvas></div>
+                <div class="chart-box"><canvas id="vibrationChart"></canvas></div>
+                <div class="chart-box"><canvas id="loadChart"></canvas></div>
+              </div>
+              <div class="history-images-wrap">
+                <div class="mini-label">Previous Captures</div>
+                <div class="image-strip" id="previousImages"></div>
+              </div>
+            </div>
+
+            <div class="side-stack">
+              <div class="alerts-panel card" id="alerts">
+                <div class="panel-header compact">
+                  <div>
+                    <p class="panel-kicker">ALERTS &amp; DIAGNOSTICS</p>
+                    <h2>Action Required</h2>
+                  </div>
+                </div>
+                <div id="alertsList" class="alerts-list"></div>
+              </div>
+
+              <div class="sensor-panel card" id="maintenance">
+                <div class="panel-header compact">
+                  <div>
+                    <p class="panel-kicker">SYSTEM / SENSOR STATUS</p>
+                    <h2>Field Instrumentation</h2>
+                  </div>
+                </div>
+                <div id="sensorStatus" class="sensor-grid"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="tab-view" id="joint-health-view">
+          <header class="tab-header">
+            <div class="eyebrow-row">
+              <p class="panel-kicker">OPERATIONS</p>
+              <span class="sample-badge">Sample Data</span>
+            </div>
+            <h2>Joint Health</h2>
+            <p class="tab-subtitle">Review the condition of each registered joint and identify areas needing inspection or intervention.</p>
+          </header>
+          <div class="card">
+            <div class="panel-header compact">
+              <div>
+                <p class="panel-kicker">JOINT HEALTH OVERVIEW</p>
+                <h2>Registered Joints</h2>
+              </div>
+            </div>
+            <div class="joint-grid" id="jointCardsHealth"></div>
+          </div>
+        </div>
+
+        <div class="tab-view" id="live-monitoring-view">
+          <header class="tab-header">
+            <div class="eyebrow-row">
+              <p class="panel-kicker">LIVE SYSTEM</p>
+              <span class="sample-badge">Sample Data</span>
+            </div>
+            <h2>Live Monitoring</h2>
+            <p class="tab-subtitle">Track sensor data in real time for the current joint and monitor unhealthy operating conditions as they appear.</p>
+          </header>
+          <div class="card emphasis">
+            <div class="panel-header">
+              <div>
+                <p class="panel-kicker">LIVE JOINT MONITORING</p>
+                <h2>Current Joint in Station</h2>
+              </div>
+              <div class="header-tag" id="liveStateTagAlt">NORMAL</div>
+            </div>
+            <div class="live-body">
+              <div class="camera-panel">
+                <div class="camera-overlay">LIVE CAMERA FEED</div>
+                <img id="liveJointImageAlt" src="" alt="Live joint image" />
+              </div>
+              <div class="joint-metrics">
+                <div class="metric-row"><label>Joint ID</label><strong id="liveJointIdAlt">--</strong></div>
+                <div class="metric-row"><label>Temperature</label><strong id="liveTemperatureAlt">--</strong></div>
+                <div class="metric-row"><label>Vibration / Impact</label><strong id="liveVibrationAlt">--</strong></div>
+                <div class="metric-row"><label>Load / Tension</label><strong id="liveTensionAlt">--</strong></div>
+                <div class="metric-row"><label>Belt Speed</label><strong id="liveSpeedAlt">--</strong></div>
+                <div class="metric-row"><label>Motor Current</label><strong id="liveCurrentAlt">--</strong></div>
+                <div class="metric-row"><label>Belt Alignment</label><strong id="liveAlignmentAlt">--</strong></div>
+                <div class="metric-row big"><label>Joint Health Index</label><strong id="liveHealthIndexAlt">--</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-view" id="analytics-view">
+          <header class="tab-header">
+            <div class="eyebrow-row">
+              <p class="panel-kicker">ANALYSIS</p>
+              <span class="sample-badge">Sample Data</span>
+            </div>
+            <h2>Analytics</h2>
+            <p class="tab-subtitle">These trend graphs are sample signals for a selected joint. They help operators understand whether the joint is stabilizing, degrading, or approaching a fault condition.</p>
+          </header>
+
+          <div class="graph-guide">
+            <div class="graph-note">
+              <strong>Health Index</strong>
+              <span>Shows the overall condition of the joint across recent passes. A steady fall often signals rising wear, alignment loss, or thermal stress.</span>
+            </div>
+            <div class="graph-note">
+              <strong>Temperature</strong>
+              <span>Tracks heat buildup at the splice. Faster climbs usually indicate friction, poor contact, or a developing hotspot.</span>
+            </div>
+            <div class="graph-note">
+              <strong>Vibration</strong>
+              <span>Measures mechanical impact and belt instability. A rising curve often points to mechanical looseness or uneven joint loading.</span>
+            </div>
+            <div class="graph-note">
+              <strong>Load / Tension</strong>
+              <span>Displays the force acting through the belt. Sudden increases can reveal overload conditions, drift, or abnormal stress distribution.</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="panel-header compact">
+              <div>
+                <p class="panel-kicker">SELECTED JOINT HISTORY</p>
+                <h2>Trend Analysis</h2>
+              </div>
+            </div>
+            <div class="chart-grid">
+              <div class="chart-box"><canvas id="healthChartAlt"></canvas></div>
+              <div class="chart-box"><canvas id="temperatureChartAlt"></canvas></div>
+              <div class="chart-box"><canvas id="vibrationChartAlt"></canvas></div>
+              <div class="chart-box"><canvas id="loadChartAlt"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-view" id="alerts-view">
+          <header class="tab-header">
+            <div class="eyebrow-row">
+              <p class="panel-kicker">DIAGNOSTICS</p>
+              <span class="sample-badge">Sample Data</span>
+            </div>
+            <h2>Alerts</h2>
+            <p class="tab-subtitle">Surface active warnings and critical issues that require maintenance attention or immediate operator response.</p>
+          </header>
+          <div class="card">
+            <div class="panel-header compact">
+              <div>
+                <p class="panel-kicker">ALERTS &amp; DIAGNOSTICS</p>
+                <h2>Action Required</h2>
+              </div>
+            </div>
+            <div id="alertsListAlt" class="alerts-list"></div>
+          </div>
+        </div>
+
+        <div class="tab-view" id="maintenance-view">
+          <header class="tab-header">
+            <div class="eyebrow-row">
+              <p class="panel-kicker">SUPPORT</p>
+              <span class="sample-badge">Sample Data</span>
+            </div>
+            <h2>Maintenance</h2>
+            <p class="tab-subtitle">Review field instrumentation status and confirm the system health of sensors, controllers, and connected devices.</p>
+          </header>
+          <div class="card">
+            <div class="panel-header compact">
+              <div>
+                <p class="panel-kicker">SYSTEM / SENSOR STATUS</p>
+                <h2>Field Instrumentation</h2>
+              </div>
+            </div>
+            <div id="sensorStatusAlt" class="sensor-grid"></div>
+          </div>
+        </div>
+
+        <div class="tab-view" id="reports-view">
+          <header class="tab-header">
+            <div class="eyebrow-row">
+              <p class="panel-kicker">REPORTS</p>
+              <span class="sample-badge">Sample Data</span>
+            </div>
+            <h2>Operational Reports</h2>
+            <p class="tab-subtitle">Summarize recent inspection performance and record the current operational state for shift review.</p>
+          </header>
+
+          <div class="report-grid">
+            <div class="report-card card">
+              <span class="report-label">Shift Summary</span>
+              <strong>88.2%</strong>
+              <small>healthy joint throughput</small>
+            </div>
+            <div class="report-card card">
+              <span class="report-label">Inspection Coverage</span>
+              <strong>96.4%</strong>
+              <small>of expected belt checks</small>
+            </div>
+            <div class="report-card card">
+              <span class="report-label">Maintenance Window</span>
+              <strong>12:30</strong>
+              <small>next scheduled intervention</small>
+            </div>
+          </div>
+
+          <div class="card report-table-card">
+            <div class="panel-header compact">
+              <div>
+                <p class="panel-kicker">REPORT LOG</p>
+                <h2>Current Inspection Log</h2>
+              </div>
+              <button class="download-report-btn" id="downloadReportBtn" type="button">Download PDF</button>
+            </div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Joint</th>
+                  <th>Health</th>
+                  <th>Condition</th>
+                  <th>Owner</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>J-03</td><td>68%</td><td>Warning</td><td>Inspection Team A</td></tr>
+                <tr><td>J-12</td><td>42%</td><td>Critical</td><td>Maintenance</td></tr>
+                <tr><td>J-21</td><td>58%</td><td>Warning</td><td>Line Ops</td></tr>
+                <tr><td>J-51</td><td>92%</td><td>Healthy</td><td>Inspection Team B</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>
